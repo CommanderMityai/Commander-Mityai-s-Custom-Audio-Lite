@@ -1,0 +1,11 @@
+## Interface: 120000
+## Title: Commander Mityai's Custom Audio Lite
+## Notes: Кастомные звуки на ключевые игровые события
+## Author: CommanderMityai
+## Version: 0.1
+## SavedVariables: CustomAudioLiteDB
+
+embeds.xml
+defaults.lua
+core.lua
+config.lua

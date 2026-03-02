@@ -1,0 +1,33 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Script file="Libs\LibStub\LibStub.lua"/>
+    <Script file="Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+    
+    <Script file="Libs\Ace3\AceAddon-3.0\AceAddon-3.0.lua"/>
+    <Script file="Libs\Ace3\AceDB-3.0\AceDB-3.0.lua"/>
+    <Script file="Libs\Ace3\AceDBOptions-3.0\AceDBOptions-3.0.lua"/>
+    <Script file="Libs\Ace3\AceEvent-3.0\AceEvent-3.0.lua"/>
+    <Script file="Libs\Ace3\AceHook-3.0\AceHook-3.0.lua"/>
+    <Script file="Libs\Ace3\AceTimer-3.0\AceTimer-3.0.lua"/>  <!-- ДОБАВЛЕНО! -->
+    
+    <Script file="Libs\Ace3\AceGUI-3.0\AceGUI-3.0.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-Button.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-CheckBox.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-DropDown.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-DropDown-Items.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-EditBox.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-Keybinding.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-Label.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-MultiLineEditBox.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIWidget-Slider.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIContainer-Frame.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIContainer-InlineGroup.lua"/>
+    <Script file="Libs\Ace3\AceGUI-3.0\widgets\AceGUIContainer-TreeGroup.lua"/>
+    
+    <!-- КРИТИЧЕСКИ ВАЖНЫЙ ПОРЯДОК! -->
+    <Script file="Libs\Ace3\AceConfig-3.0\AceConfigRegistry-3.0.lua"/>
+    <Script file="Libs\Ace3\AceConfig-3.0\AceConfigCmd-3.0.lua"/>
+    <Script file="Libs\Ace3\AceConfig-3.0\AceConfig-3.0.lua"/>
+    <Script file="Libs\Ace3\AceConfig-3.0\AceConfigDialog-3.0.lua"/>
+    
+    <Script file="Libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua"/>
+</Ui>

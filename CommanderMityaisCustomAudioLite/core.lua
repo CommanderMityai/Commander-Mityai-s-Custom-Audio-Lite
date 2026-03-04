@@ -258,12 +258,5 @@ function CustomAudioLite:OnInitialize()
     C_Timer.NewTicker(0.5, CheckCustomAuras)
 
     -- Регистрация опций
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("CustomAudioLite", CustomAudioLiteOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("CustomAudioLite", "Commander Mityai's Custom Audio Lite")
 
-    -- Слэш-команда
-    SLASH_CUSTOMAUDIOLITE1 = "/сal"
-    SlashCmdList["CUSTOMAUDIOLITE"] = function()
-        LibStub("AceConfigDialog-3.0"):Open("CustomAudioLite")
-    end
 end

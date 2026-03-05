@@ -25,25 +25,31 @@ local INTERRUPT_SPELLS = {
 
 -- Спеллы боевого воскрешения
 local COMBAT_REZ_SPELLS = {
-    [20484] = true,   -- Rebirth (Druid)
-    [61999] = true,   -- Raise Ally (Death Knight)
-    [95750] = true,   -- Soulstone Resurrection (Warlock)
-    [391054] = true,  -- Intercession (Paladin)
-    [345130] = true,  -- Disposable Spectrophasic Reanimator (Engineer)
-    [385403] = true,  -- Tinker: Arclight Vital Correctors (Engineer)
-    [384893] = true,  -- Convincingly Realistic Jumper Cables (Engineer)
+    [20484] = true,  -- Rebirth (Druid)
+    [61999] = true,  -- Raise Ally (Death Knight)
+    [95750] = true,  -- Soulstone Resurrection (Warlock)
+    [391054] = true, -- Intercession (Paladin)
+    [345130] = true, -- Disposable Spectrophasic Reanimator (Engineer)
+    [385403] = true, -- Tinker: Arclight Vital Correctors (Engineer)
+    [384893] = true, -- Convincingly Realistic Jumper Cables (Engineer)
 }
 
 -- Кэш для предотвращения дублирования звука
 local soundCooldown = {}
 local hasBloodlust = false
+local bloodlustLostTime = nil
+local BLOODLUST_GRACE = 5
+local BLOODLUST_MAX_ELAPSED = 5
 local hasCustomAuras = {}
-local lastRezCharges = {} 
+local customAuraLostTime = {}
+local CUSTOM_AURA_GRACE = 5
+local CUSTOM_AURA_MAX_ELAPSED = 5
+local lastRezCharges = {}
 
 function CustomAudioLite:PlaySoundEffect(dbEntry, eventKey)
     if not dbEntry or not dbEntry.enabled then return end
     if soundCooldown[eventKey] and GetTime() - soundCooldown[eventKey] < 0.3 then return end
-    
+
     local path, channel = "", dbEntry.channel
     local source = dbEntry.source or "custom"
 
@@ -74,7 +80,9 @@ function CustomAudioLite:PlaySoundEffect(dbEntry, eventKey)
 
     if path ~= "" then
         if C_Sound and C_Sound.PlaySoundFile then
-            local soundChannel = Enum and Enum.SoundKitChannel and Enum.SoundKitChannel[channel] or Enum.SoundKitChannel.Master
+            local soundChannel = Enum and Enum.SoundKitChannel
+                and Enum.SoundKitChannel[channel]
+                or Enum.SoundKitChannel.Master
             C_Sound.PlaySoundFile(path, soundChannel)
         else
             PlaySoundFile(path, channel)
@@ -120,19 +128,42 @@ end
 -- Бладласт
 local function CheckBloodlust()
     if not db.events.bloodlust.enabled then return end
+
     local found = false
+    local isNewAura = false
+
     for spellId in pairs(BLOODLUST_SPELLS) do
-        local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID and C_UnitAuras.GetPlayerAuraBySpellID(spellId)
+        local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID
+            and C_UnitAuras.GetPlayerAuraBySpellID(spellId)
         if aura then
             found = true
+            if aura.duration and aura.duration > 0
+                and aura.expirationTime then
+                local elapsed = aura.duration
+                    - (aura.expirationTime - GetTime())
+                if elapsed < BLOODLUST_MAX_ELAPSED then
+                    isNewAura = true
+                end
+            end
             break
         end
     end
-    if found and not hasBloodlust then
-        CustomAudioLite:PlaySoundEffect(db.events.bloodlust, "bloodlust")
-        hasBloodlust = true
-    elseif not found and hasBloodlust then
-        hasBloodlust = false
+
+    if found then
+        bloodlustLostTime = nil
+        if not hasBloodlust and isNewAura then
+            CustomAudioLite:PlaySoundEffect(db.events.bloodlust, "bloodlust")
+            hasBloodlust = true
+        elseif not hasBloodlust then
+            hasBloodlust = true
+        end
+    elseif hasBloodlust then
+        if not bloodlustLostTime then
+            bloodlustLostTime = GetTime()
+        elseif GetTime() - bloodlustLostTime > BLOODLUST_GRACE then
+            hasBloodlust = false
+            bloodlustLostTime = nil
+        end
     end
 end
 
@@ -143,12 +174,33 @@ local function CheckCustomAuras()
     for i, auraConfig in ipairs(auras) do
         if auraConfig.enabled and auraConfig.auraId then
             local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID and C_UnitAuras.GetPlayerAuraBySpellID(auraConfig.auraId)
+            local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID
+                and C_UnitAuras.GetPlayerAuraBySpellID(auraConfig.auraId)
             local auraKey = "aura_" .. i
-            if aura and not hasCustomAuras[auraKey] then
-                CustomAudioLite:PlaySoundEffect(auraConfig, "customAura_" .. auraConfig.auraId)
-                hasCustomAuras[auraKey] = true
-            elseif not aura and hasCustomAuras[auraKey] then
-                hasCustomAuras[auraKey] = nil
+
+            if aura then
+                    local isNewAura = false
+                    if aura.duration and aura.duration > 0
+                        and aura.expirationTime then
+                        local elapsed = aura.duration
+                            - (aura.expirationTime - GetTime())
+                        if elapsed < CUSTOM_AURA_MAX_ELAPSED then
+                            isNewAura = true
+                        end
+                    end
+                            auraConfig,
+                            "customAura_" .. auraConfig.auraId)
+                    end
+                    hasCustomAuras[auraKey] = true
+                end
+            elseif hasCustomAuras[auraKey] then
+                if not customAuraLostTime[auraKey] then
+                    customAuraLostTime[auraKey] = GetTime()
+                elseif GetTime() - customAuraLostTime[auraKey]
+                    > CUSTOM_AURA_GRACE then
+                    hasCustomAuras[auraKey] = nil
+                    customAuraLostTime[auraKey] = nil
+                end
             end
         end
     end
@@ -157,18 +209,16 @@ end
 -- Проверка комбат-ресов через событие SPELL_UPDATE_CHARGES 
 local function CheckCombatRez()
     if not db.events.combatRez.enabled then return end
-    
     for spellId in pairs(COMBAT_REZ_SPELLS) do
-        local chargeInfo = C_Spell and C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(spellId)
+        local chargeInfo = C_Spell and C_Spell.GetSpellCharges
+            and C_Spell.GetSpellCharges(spellId)
         if chargeInfo and chargeInfo.currentCharges then
             local currentCharges = chargeInfo.currentCharges
             local lastCharges = lastRezCharges[spellId]
             
-            -- Если зарядов стало меньше — кто-то использовал рес
             if lastCharges and currentCharges < lastCharges then
                 CustomAudioLite:PlaySoundEffect(db.events.combatRez, "combatRez_" .. spellId)
             end
-            
             lastRezCharges[spellId] = currentCharges
         end
     end
@@ -185,6 +235,9 @@ function CustomAudioLite:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellID)
         for _, spellConfig in ipairs(db.customSpells.spells) do
             if spellConfig.enabled and spellConfig.spellId and tonumber(spellConfig.spellId) == spellID then
                 CustomAudioLite:PlaySoundEffect(spellConfig, "customSpell_" .. spellID)
+            if spellConfig.enabled and spellConfig.spellId
+                and tonumber(spellConfig.spellId) == spellID then
+                CustomAudioLite:PlaySoundEffect(spellConfig, "customSpell" .. spellID)
                 break
             end
         end
@@ -210,7 +263,8 @@ function CustomAudioLite:ZONE_CHANGED_NEW_AREA()
         CustomAudioLite:PlaySoundEffect(db.events.raidEnterDungeon, "raidEnterDungeon")
         return
     end
-    if db.events.raidEnterRaid.enabled and (instanceType == "raid" or instanceType == "flex") then
+    if db.events.raidEnterRaid.enabled
+        and (instanceType == "raid" or instanceType == "flex") then
         CustomAudioLite:PlaySoundEffect(db.events.raidEnterRaid, "raidEnterRaid")
         return
     end

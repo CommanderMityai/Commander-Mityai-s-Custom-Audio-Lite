@@ -179,6 +179,8 @@ local function CheckCustomAuras()
             local auraKey = "aura_" .. i
 
             if aura then
+                customAuraLostTime[auraKey] = nil
+                if not hasCustomAuras[auraKey] then
                     local isNewAura = false
                     if aura.duration and aura.duration > 0
                         and aura.expirationTime then
@@ -188,6 +190,8 @@ local function CheckCustomAuras()
                             isNewAura = true
                         end
                     end
+                    if isNewAura then
+                        CustomAudioLite:PlaySoundEffect(
                             auraConfig,
                             "customAura_" .. auraConfig.auraId)
                     end
@@ -206,7 +210,7 @@ local function CheckCustomAuras()
     end
 end
 
--- Проверка комбат-ресов через событие SPELL_UPDATE_CHARGES 
+-- Проверка комбат-ресов
 local function CheckCombatRez()
     if not db.events.combatRez.enabled then return end
     for spellId in pairs(COMBAT_REZ_SPELLS) do
@@ -215,7 +219,6 @@ local function CheckCombatRez()
         if chargeInfo and chargeInfo.currentCharges then
             local currentCharges = chargeInfo.currentCharges
             local lastCharges = lastRezCharges[spellId]
-            
             if lastCharges and currentCharges < lastCharges then
                 CustomAudioLite:PlaySoundEffect(db.events.combatRez, "combatRez_" .. spellId)
             end
@@ -224,7 +227,7 @@ local function CheckCombatRez()
     end
 end
 
--- Прерывание через каст спелла прерывания
+-- Прерывание
 function CustomAudioLite:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellID)
     if unit ~= "player" then return end
     if INTERRUPT_SPELLS[spellID] and db.events.interrupt.enabled then
@@ -233,8 +236,6 @@ function CustomAudioLite:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellID)
     end
     if db.customSpells.enabled then
         for _, spellConfig in ipairs(db.customSpells.spells) do
-            if spellConfig.enabled and spellConfig.spellId and tonumber(spellConfig.spellId) == spellID then
-                CustomAudioLite:PlaySoundEffect(spellConfig, "customSpell_" .. spellID)
             if spellConfig.enabled and spellConfig.spellId
                 and tonumber(spellConfig.spellId) == spellID then
                 CustomAudioLite:PlaySoundEffect(spellConfig, "customSpell" .. spellID)
@@ -243,20 +244,17 @@ function CustomAudioLite:UNIT_SPELLCAST_SUCCEEDED(_, unit, _, spellID)
         end
     end
 end
-
--- Событие обновления зарядов 
+-- Обновление зарядов
 function CustomAudioLite:SPELL_UPDATE_CHARGES()
     CheckCombatRez()
 end
-
--- Смерть игрока
+-- смерть игрока
 function CustomAudioLite:OnPlayerDead()
     if db.events.death.enabled then
         CustomAudioLite:PlaySoundEffect(db.events.death, "death")
     end
 end
-
--- Вход в данж/рейд
+-- Вход в данж\рейд
 function CustomAudioLite:ZONE_CHANGED_NEW_AREA()
     local _, instanceType = GetInstanceInfo()
     if db.events.raidEnterDungeon.enabled and instanceType == "party" then
@@ -269,13 +267,11 @@ function CustomAudioLite:ZONE_CHANGED_NEW_AREA()
         return
     end
 end
-
--- Инициализация аддона
+-- Инициализация
 function CustomAudioLite:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("CustomAudioLiteDB", CustomAudioLiteDefaults, true)
     db = self.db.profile
-    
-    -- Миграция: Добавляем поле random в старые спеллы
+
     if db.customSpells.spells then
         for _, spell in ipairs(db.customSpells.spells) do
             if not spell.random then
@@ -288,7 +284,6 @@ function CustomAudioLite:OnInitialize()
         end
     end
 
-    -- Миграция: Добавляем поле random в старые ауры
     if db.customAuras.auras then
         for _, aura in ipairs(db.customAuras.auras) do
             if not aura.random then
@@ -300,18 +295,13 @@ function CustomAudioLite:OnInitialize()
             end
         end
     end
-
-    -- Регистрация событий
+-- Регистрация событий
     self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     self:RegisterEvent("PLAYER_DEAD", "OnPlayerDead")
     self:RegisterEvent("CHAT_MSG_LOOT")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     self:RegisterEvent("SPELL_UPDATE_CHARGES")
-
-    -- Таймеры
+-- Таймеры
     C_Timer.NewTicker(0.5, CheckBloodlust)
     C_Timer.NewTicker(0.5, CheckCustomAuras)
-
-    -- Регистрация опций
-
 end

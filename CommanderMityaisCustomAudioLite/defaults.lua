@@ -68,7 +68,17 @@ CustomAudioLiteDefaults = {
         },
         customSpells = {
             enabled = true,
-            spells = {},
+            spells = {
+                {
+                    spellId = 1269949, 
+                    enabled = true,
+                    source = "custom",
+                    channel = "Master",
+                    random = { path = "Interface\\AddOns\\CommanderMityaisCustomAudioLite\\sounds\\CustomSpells\\Fish.mp3", max = 5, isRandom = { enabled = true, currentFile = 1 } },
+                    shared = { value = "None" },
+                    custom = { path = "Interface\\AddOns\\CommanderMityaisCustomAudioLite\\sounds\\CustomSpells\\Fish.mp3", max = 1, isRandom = { enabled = true, currentFile = 1 } },
+                },
+            },
         },
         customAuras = {
             enabled = true,

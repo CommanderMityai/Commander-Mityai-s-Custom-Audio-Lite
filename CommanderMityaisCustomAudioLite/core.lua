@@ -88,6 +88,9 @@ function CustomAudioLite:PlaySoundEffect(dbEntry, eventKey)
             PlaySoundFile(path, channel)
         end
         soundCooldown[eventKey] = GetTime()
+         --print("✅ Звук проигран: " .. path)
+        --else
+        --print("❌ Путь к звуку пустой! source=" .. source .. ", path=" .. (dbEntry.random and dbEntry.random.path or dbEntry.custom.path or "nil"))
     end
 end
 
@@ -185,6 +188,8 @@ local function CheckCustomAuras()
                         if elapsed < CUSTOM_AURA_MAX_ELAPSED then
                             isNewAura = true
                         end
+                    else
+                        isNewAura = true
                     end
                     if isNewAura then
                         CustomAudioLite:PlaySoundEffect(
@@ -244,13 +249,13 @@ end
 function CustomAudioLite:SPELL_UPDATE_CHARGES()
     CheckCombatRez()
 end
--- смерть игрока
+-- смерть
 function CustomAudioLite:OnPlayerDead()
     if db.events.death.enabled then
         CustomAudioLite:PlaySoundEffect(db.events.death, "death")
     end
 end
--- Вход в данж\рейд
+-- Вход в данж/рейд
 function CustomAudioLite:ZONE_CHANGED_NEW_AREA()
     local _, instanceType = GetInstanceInfo()
     if db.events.raidEnterDungeon.enabled and instanceType == "party" then

@@ -88,9 +88,6 @@ function CustomAudioLite:PlaySoundEffect(dbEntry, eventKey)
             PlaySoundFile(path, channel)
         end
         soundCooldown[eventKey] = GetTime()
-        --print("✅ Звук проигран: " .. path)
-        --else
-        --print("❌ Путь к звуку пустой! source=" .. source .. ", path=" .. (dbEntry.random and dbEntry.random.path or dbEntry.custom.path or "nil"))
     end
 end
 
@@ -173,7 +170,6 @@ local function CheckCustomAuras()
     local auras = db.customAuras.auras
     for i, auraConfig in ipairs(auras) do
         if auraConfig.enabled and auraConfig.auraId then
-            local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID and C_UnitAuras.GetPlayerAuraBySpellID(auraConfig.auraId)
             local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID
                 and C_UnitAuras.GetPlayerAuraBySpellID(auraConfig.auraId)
             local auraKey = "aura_" .. i

@@ -32,6 +32,8 @@ local COMBAT_REZ_SPELLS = {
     [345130] = true, -- Disposable Spectrophasic Reanimator (Engineer)
     [385403] = true, -- Tinker: Arclight Vital Correctors (Engineer)
     [384893] = true, -- Convincingly Realistic Jumper Cables (Engineer)
+    [248486] = true, -- ENGI cr midnight
+    [1259644] = true, --ENGI cr midnight
 }
 
 -- Кэш для предотвращения дублирования звука

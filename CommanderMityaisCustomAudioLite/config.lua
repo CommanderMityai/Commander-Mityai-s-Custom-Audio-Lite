@@ -452,7 +452,7 @@ local function GetSoundReplacementOptions(repIndex)
             soundKitId = {
                 type  = "input",
                 name  = "SoundKit ID",
-                desc  = "ID из SOUNDKIT / Wowhead (например 3175 = MapPing). "
+                desc  = "ID из SOUNDKIT / Wowhead (например 8960 = Ready Check). "
                      .. "Используется для перехвата PlaySound и воспроизведения замены.",
                 width = "normal",
                 order = 5,
@@ -482,7 +482,7 @@ local function GetSoundReplacementOptions(repIndex)
                 type  = "select",
                 name  = "Откуда долбит",
                 desc  = "\"Онли мут клоун\" — ничего не играет. "
-                     .. "Всё то же что и в других функциях.",
+                     .. "Всё то же что и в других функциях",
                 width = "double",
                 order = 8,
                 values = {
@@ -646,9 +646,6 @@ CustomAudioLiteOptions = {
         raidEnterRaid    = GetSoundOptions("raidEnterRaid",    "Вход в рейд",
             "У лохов нет курвы"),
 
-            
-
-
         -- Кастомные спеллы ------------------------------------
 
         customSpells = {
@@ -772,7 +769,7 @@ CustomAudioLiteOptions = {
                     type     = "description",
                     fontSize = "medium",
                     order    = 1,
-                    name     = "Замена любых игровых звуков|r\n"
+                    name     = "|cff00ccffСистема замены игровых звуков|r\n"
                             .. "Позволяет заглушить любой звук клиента (MuteSoundFile) "
                             .. "и/или перехватить вызов PlaySound для подмены "
                             .. "кастомным звуком.\n",
@@ -780,7 +777,7 @@ CustomAudioLiteOptions = {
 
                 enabled = {
                     type  = "toggle",
-                    name  = "Включить",
+                    name  = "Система замены включена",
                     desc  = "Глобальный выключатель. При выключении все мьюты "
                          .. "снимаются, перехват PlaySound не срабатывает.",
                     width = "full",
@@ -834,7 +831,54 @@ CustomAudioLiteOptions = {
         },
 
 
-        -- О аддоне  -------------------------
+        -- Отладка --------------------------------------------
+
+        zzz_debug = {
+            type = "group",
+            name = "Отладка",
+            args = {
+
+                enabled = {
+                    type  = "toggle",
+                    name  = "Включить лог звуков в чат",
+                    desc  = "При каждом вызове PlaySound() пишет в чат SoundKit ID и ссылку на Wowhead",
+                    width = "full",
+                    order = 1,
+                    get   = function()
+                        return CustomAudioLite.db.profile.debug.enabled
+                    end,
+                    set   = function(_, value)
+                        CustomAudioLite.db.profile.debug.enabled = value
+                        if value then
+                            print("|cff00ccff[CAL Debug]|r Лог звуков |cff00ff00включён|r — смотри в чат")
+                        else
+                            print("|cff00ccff[CAL Debug]|r Лог звуков |cffff4444выключен|r")
+                        end
+                    end,
+                },
+
+                spacer1 = { type = "description", name = " ", order = 2 },
+
+                howto = {
+                    type     = "description",
+                    name     = "|cffffd100Как пользоваться:|r\n"
+                        .. "1. Включи лог выше\n"
+                        .. "2. Вызови нужное действие в игре (кнопка, событие, UI)\n"
+                        .. "3. В чате появится строка вида:\n"
+                        .. "   |cff888888[CAL Debug] PlaySound: 12345  канал: Master  wowhead.com/sound=12345|r\n"
+                        .. "4. Перейди по ссылке на Wowhead — там найдёшь FileData ID для мьюта\n"
+                        .. "5. Скопируй SoundKit ID в раздел «Замена звуков»\n\n"
+                        .. "|cffff4444Внимание:|r лог очень шумный — любой клик по UI генерирует звук. "
+                        .. "Выключай сразу после того как нашёл нужный ID.",
+                    fontSize = "small",
+                    order    = 3,
+                },
+
+            },
+        },
+
+
+        -- О аддоне (всегда последний) -------------------------
 
         zzz_about = {
             type = "group",
@@ -847,7 +891,7 @@ CustomAudioLiteOptions = {
                     name     = "Commander Mityai's Custom Audio Lite v0.778\n\n"
                         .. "Создано специально для игрового сообщества \"Казимир\", "
                         .. "навайбкожено слезами и потом\n"
-                        .. "При возникновении идей для добавления нового функционала - пишите в личку\n\n"
+                        .. "При возникновении идей для добавления нового функционала — пишите в личку\n\n"
                         .. "Поддерживаемые события:\n"
                         .. "  \226\128\162 Прерывание каста (UNIT_SPELLCAST_SUCCEEDED)\n"
                         .. "  \226\128\162 Смерть персонажа (OnPlayerDead)\n"
@@ -857,10 +901,10 @@ CustomAudioLiteOptions = {
                         .. "  \226\128\162 Вход в данж / рейд (ZONE_CHANGED_NEW_AREA)\n"
                         .. "  \226\128\162 Кастомные спеллы (UNIT_SPELLCAST_SUCCEEDED)\n"
                         .. "  \226\128\162 Кастомные ауры (C_UnitAuras polling)\n"
-                        .. "  \226\128\162 Замена / мьют игровых звуков|r "
+                        .. "  \226\128\162 Замена / мут игровых звуков|r "
                         .. "(MuteSoundFile + PlaySound hook)\n\n"
                         .. "Поддержка .mp3 и ВОЗМОЖНО .ogg\n"
-                        .. "Добавить свой звук — закинуть в папку, прописать путь.\n"
+                        .. "Добавить свой звук — закинуть в папку, прописать путь\n"
                         .. "Есть функционал отладки через чат - для включения раскомментить строчку где-то на 130 в core",
                 },
             },

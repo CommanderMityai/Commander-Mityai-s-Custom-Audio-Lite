@@ -277,8 +277,8 @@ CustomAudioLiteDefaults = {
                 {
                     enabled     = true,
                     name        = "Friend",
-                    soundKitId  = 3332,      
-                    fileDataIds = "567518",       
+                    soundKitId  = 18019,      
+                    fileDataIds = "567402",       
                     source      = "custom", 
                     channel     = "Master",
                     shared      = { value = "KAZ_SilverGroup" },
@@ -288,8 +288,8 @@ CustomAudioLiteDefaults = {
                 {
                     enabled     = true,
                     name        = "RaidWarning",
-                    soundKitId  = 3332,      
-                    fileDataIds = "567518",       
+                    soundKitId  = 8959,      
+                    fileDataIds = "567397",       
                     source      = "custom", 
                     channel     = "Master",
                     shared      = { value = "KAZ_SilverGroup" },
@@ -314,6 +314,12 @@ CustomAudioLiteDefaults = {
                 },
                 ]]
             },
+        },
+        -- ========================================================
+        -- Отладка
+        -- ========================================================
+        debug = {
+            enabled = false,
         },
     },
 }

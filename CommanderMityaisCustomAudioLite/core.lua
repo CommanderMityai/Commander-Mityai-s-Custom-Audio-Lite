@@ -477,4 +477,32 @@ function CustomAudioLite:OnInitialize()
     -- Тикеры
     C_Timer.NewTicker(0.5, CheckBloodlust)
     C_Timer.NewTicker(0.5, CheckCustomAuras)
+
+    self:InstallDebugHook()
+end
+-- ============================================================
+-- Отладка: хук на PlaySound
+-- ============================================================
+
+local _debugHookInstalled = false
+
+function CustomAudioLite:InstallDebugHook()
+    if _debugHookInstalled then return end
+    _debugHookInstalled = true
+
+    hooksecurefunc("PlaySound", function(soundKitID, channel, forceNoDuplicates, runFinishCallback)
+        if not db or not db.debug or not db.debug.enabled then return end
+
+        local msg = "|cff00ccff[CAL Debug]|r PlaySound: "
+            .. "|cffffff00" .. tostring(soundKitID) .. "|r"
+
+        if channel then
+            msg = msg .. "  канал: |cffaaaaaa" .. tostring(channel) .. "|r"
+        end
+
+        -- Ссылка на Wowhead
+        msg = msg .. "  |cff888888wowhead.com/sound=" .. tostring(soundKitID) .. "|r"
+
+        print(msg)
+    end)
 end
